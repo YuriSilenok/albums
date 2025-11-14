@@ -1,17 +1,22 @@
 from django.contrib import admin
 from django.db.models import Q
+from django.utils.html import format_html
 from .models import Album, MediaFile, ActivityLog, UserProfile
 
 class ActivityLogAdmin(admin.ModelAdmin):
-    list_display = ['user', 'action', 'timestamp', 'ip_address', 'album', 'browser_family', 'os_family']
+    list_display = ['user', 'action', 'timestamp', 'ip_address', 'album', 'content_url_link', 'browser_family', 'os_family']
     list_filter = ['action', 'timestamp', 'browser_family', 'os_family', 'device_family']
-    search_fields = ['user__username', 'ip_address', 'user_agent', 'album__title']
-    readonly_fields = ['timestamp', 'ip_address', 'user_agent', 'referrer']
+    search_fields = ['user__username', 'ip_address', 'user_agent', 'album__title', 'content_url']
+    readonly_fields = ['timestamp', 'ip_address', 'user_agent', 'referrer', 'object_id', 'content_url_readonly']
     date_hierarchy = 'timestamp'
     
     fieldsets = (
         ('Основная информация', {
-            'fields': ('user', 'action', 'timestamp', 'album', 'media_file')
+            'fields': ('user', 'action', 'timestamp', 'album')
+        }),
+        ('Контент', {
+            'fields': ('object_id', 'content_url_readonly'),
+            'description': 'Информация о контенте (альбом или файл), над которым выполнено действие'
         }),
         ('Техническая информация', {
             'fields': ('ip_address', 'user_agent', 'referrer')
@@ -24,6 +29,28 @@ class ActivityLogAdmin(admin.ModelAdmin):
             )
         }),
     )
+    
+    def content_url_link(self, obj):
+        """Отображение content_url как кликабельной ссылки."""
+        if obj.content_url:
+            return format_html(
+                '<a href="{}" target="_blank" title="{}">Просмотр</a>',
+                obj.content_url,
+                obj.content_url[:50] + '...' if len(obj.content_url) > 50 else obj.content_url
+            )
+        return '-'
+    content_url_link.short_description = 'Content URL'
+    
+    def content_url_readonly(self, obj):
+        """Отображение content_url в режиме чтения как кликабельная ссылка."""
+        if obj.content_url:
+            return format_html(
+                '<a href="{}" target="_blank">{}</a>',
+                obj.content_url,
+                obj.content_url
+            )
+        return '-'
+    content_url_readonly.short_description = 'Content URL'
     
     def get_search_results(self, request, queryset, search_term):
         queryset, use_distinct = super().get_search_results(request, queryset, search_term)
@@ -53,7 +80,7 @@ class AlbumAdmin(admin.ModelAdmin):
             'fields': ('title', 'description', 'owner')
         }),
         ('Доступ и безопасность', {
-            'fields': ('is_public', 'password', 'view_password')
+            'fields': ('is_public', 'view_password')
         }),
         ('Статус удаления', {
             'fields': ('is_deleted', 'deleted_at')

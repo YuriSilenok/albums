@@ -68,6 +68,7 @@ class ActivityLog(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True, blank=True)
     object_id = models.UUIDField(null=True, blank=True)
     content_object = GenericForeignKey('content_type', 'object_id')
+    content_url = models.URLField(blank=True, null=True, help_text='URL на контент (альбом или файл)')
     
     # Дополнительная техническая информация
     browser_family = models.CharField(max_length=100, blank=True)

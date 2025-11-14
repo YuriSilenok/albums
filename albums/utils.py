@@ -33,17 +33,24 @@ def log_activity(request, action, user=None, album=None, media_file=None):
     ip = get_client_ip(request)
     user_agent_info = parse_user_agent(request.META.get('HTTP_USER_AGENT', ''))
     
-    # Определяем content_object для универсальной связи
+    # Определяем content_object для универсальной связи и URL
     content_type = None
     object_id = None
+    content_url = None
     
     # Приоритет: media_file > album
     if media_file:
         content_type = ContentType.objects.get_for_model(media_file)
         object_id = media_file.id
+        # Генерируем URL на файл
+        if hasattr(request, 'build_absolute_uri'):
+            content_url = request.build_absolute_uri(f'/albums/{media_file.album.id}/media/{media_file.id}/')
     elif album:
         content_type = ContentType.objects.get_for_model(album)
         object_id = album.id
+        # Генерируем URL на альбом
+        if hasattr(request, 'build_absolute_uri'):
+            content_url = request.build_absolute_uri(f'/albums/{album.id}/')
     
     log_entry = ActivityLog(
         user=user,
@@ -55,6 +62,7 @@ def log_activity(request, action, user=None, album=None, media_file=None):
         media_file=media_file,
         content_type=content_type,
         object_id=object_id,
+        content_url=content_url,
         **user_agent_info
     )
     log_entry.save()
