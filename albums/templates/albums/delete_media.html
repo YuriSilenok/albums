@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card mx-auto" style="max-width:600px; border-color: #dc3545;">
+  <div class="card-body">
+    <h2 class="h5 mb-3 text-danger">Удалить медиа-файл</h2>
+    <p>Вы действительно хотите удалить файл <strong>{{ media_file.file.name }}</strong> из альбома?</p>
+    <p class="text-muted small">Это действие невозможно отменить.</p>
+    
+    <div class="d-flex gap-2">
+      <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Удалить</button>
+      </form>
+      <a href="{% url 'album_detail' album.id %}" class="btn btn-outline-secondary">Отмена</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

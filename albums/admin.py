@@ -43,14 +43,45 @@ class ActivityLogAdmin(admin.ModelAdmin):
         return queryset, use_distinct
 
 class AlbumAdmin(admin.ModelAdmin):
-    list_display = ['title', 'owner', 'created_at', 'is_public']
-    list_filter = ['is_public', 'created_at']
+    list_display = ['title', 'owner', 'created_at', 'is_public', 'is_deleted', 'deleted_at']
+    list_filter = ['is_public', 'is_deleted', 'created_at']
     search_fields = ['title', 'owner__username']
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('title', 'description', 'owner')
+        }),
+        ('Доступ и безопасность', {
+            'fields': ('is_public', 'password', 'view_password')
+        }),
+        ('Статус удаления', {
+            'fields': ('is_deleted', 'deleted_at')
+        }),
+        ('Даты', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
 
 class MediaFileAdmin(admin.ModelAdmin):
-    list_display = ['file', 'album', 'file_type', 'uploaded_at']
-    list_filter = ['file_type', 'uploaded_at']
+    list_display = ['file', 'album', 'file_type', 'uploaded_at', 'is_deleted', 'deleted_at']
+    list_filter = ['file_type', 'is_deleted', 'uploaded_at']
     search_fields = ['album__title', 'file']
+    readonly_fields = ['uploaded_at']
+    
+    fieldsets = (
+        ('Основная информация', {
+            'fields': ('album', 'file', 'file_type', 'description')
+        }),
+        ('Статус удаления', {
+            'fields': ('is_deleted', 'deleted_at')
+        }),
+        ('Метаданные', {
+            'fields': ('uploaded_at',),
+            'classes': ('collapse',)
+        }),
+    )
 
 admin.site.register(Album, AlbumAdmin)
 admin.site.register(MediaFile, MediaFileAdmin)

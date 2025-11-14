@@ -1,3 +1,5 @@
+from django.contrib.auth.signals import user_logged_out
+from django.dispatch import receiver
 from .utils import log_activity
 
 class ActivityLoggingMiddleware:
@@ -6,10 +8,10 @@ class ActivityLoggingMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
-        
-        # Логируем вход пользователя
-        if request.user.is_authenticated and not hasattr(request, 'activity_logged'):
-            log_activity(request, 'login', user=request.user)
-            request.activity_logged = True
-            
         return response
+
+# Логирование входа пользователя
+@receiver(user_logged_out)
+def log_user_logout(sender, request, user, **kwargs):
+    """Log user logout event."""
+    log_activity(request, 'logout', user=user)

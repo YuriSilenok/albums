@@ -1,33 +1,53 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="mb-3 d-flex justify-content-between align-items-start">
-  <div>
+<div class="mb-4 d-flex justify-content-between align-items-start">
+  <div class="flex-grow-1">
     <h1 class="h4">{{ album.title }}</h1>
     <p class="text-muted">{{ album.description }}</p>
   </div>
-  <div>
+  <div class="d-flex gap-2">
     {% if user.is_authenticated and album.owner == user %}
       <a href="{% url 'upload_media' album.id %}" class="btn btn-sm btn-outline-secondary">Загрузить медиа</a>
+      <a href="{% url 'edit_album' album.id %}" class="btn btn-sm btn-outline-info">Редактировать</a>
+      <a href="{% url 'delete_album' album.id %}" class="btn btn-sm btn-outline-danger">Удалить</a>
     {% endif %}
   </div>
+</div>
+
+<!-- Share URL section -->
+<div class="mb-4">
+  <div class="input-group" style="max-width:500px;">
+    <input type="text" class="form-control" id="shareUrl" value="{{ request.build_absolute_uri }}" readonly>
+    <button class="btn btn-outline-primary" type="button" onclick="copyToClipboard()">Копировать ссылку</button>
+  </div>
+  <small class="form-text text-muted d-block mt-2">Поделитесь этой ссылкой, чтобы другие могли просмотреть альбом</small>
 </div>
 
 {% if media_files %}
   <div class="row g-3">
     {% for media in media_files %}
       <div class="col-12 col-md-6 col-lg-4">
-        <div class="card h-100">
+        <div class="card h-100 position-relative">
           {% if media.file_type == 'image' %}
-            <img src="{{ media.file.url }}" class="card-img-top" alt="{{ media.description|default:media.file.name }}">
+            <a href="{% url 'view_media' album.id media.id %}" style="text-decoration: none; color: inherit;">
+              <img src="{{ media.file.url }}" class="card-img-top" alt="{{ media.description|default:media.file.name }}" style="max-height:250px; object-fit:cover;">
+            </a>
           {% else %}
             <div class="ratio ratio-16x9 bg-dark">
-              <video controls src="{{ media.file.url }}" style="width:100%"></video>
+              <a href="{% url 'view_media' album.id media.id %}" style="text-decoration: none; color: inherit; display: flex; align-items: center; justify-content: center;">
+                <video controls src="{{ media.file.url }}" style="width:100%"></video>
+              </a>
             </div>
           {% endif %}
-          <div class="card-body">
+          <div class="card-body d-flex flex-column">
             <p class="card-text">{{ media.description }}</p>
-            <small class="text-muted">Загружено: {{ media.uploaded_at }}</small>
+            <small class="text-muted">Загружено: {{ media.uploaded_at|date:"d.m.Y H:i" }}</small>
+            {% if user.is_authenticated and album.owner == user %}
+              <div class="mt-2">
+                <a href="{% url 'delete_media' album.id media.id %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+              </div>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -35,8 +55,34 @@
   </div>
 {% else %}
   <div class="card">
-    <div class="card-body">В альбоме пока нет медиа-файлов.</div>
+    <div class="card-body">
+      <p class="mb-0">В альбоме пока нет медиа-файлов.</p>
+      {% if user.is_authenticated and album.owner == user %}
+        <a href="{% url 'upload_media' album.id %}" class="btn btn-sm btn-primary mt-2">Загрузить первый медиа-файл</a>
+      {% endif %}
+    </div>
   </div>
 {% endif %}
+
+<script>
+function copyToClipboard() {
+  const urlInput = document.getElementById('shareUrl');
+  urlInput.select();
+  document.execCommand('copy');
+  
+  // Показываем уведомление
+  const button = event.target;
+  const originalText = button.textContent;
+  button.textContent = 'Скопировано!';
+  button.classList.remove('btn-outline-primary');
+  button.classList.add('btn-success');
+  
+  setTimeout(() => {
+    button.textContent = originalText;
+    button.classList.add('btn-outline-primary');
+    button.classList.remove('btn-success');
+  }, 2000);
+}
+</script>
 
 {% endblock %}
