@@ -12,14 +12,19 @@ def get_client_ip(request):
 
 def parse_user_agent(user_agent_string):
     ua = user_agents.parse(user_agent_string)
+    # Некоторые свойства могут быть None — приводим их к пустой строке,
+    # чтобы избежать ошибок NOT NULL при сохранении в БД.
+    def _safe(attr):
+        return (attr or '')
+
     return {
-        'browser_family': ua.browser.family,
-        'browser_version': ua.browser.version_string,
-        'os_family': ua.os.family,
-        'os_version': ua.os.version_string,
-        'device_family': ua.device.family,
-        'device_brand': ua.device.brand,
-        'device_model': ua.device.model,
+        'browser_family': _safe(getattr(ua.browser, 'family', '')),
+        'browser_version': _safe(getattr(ua.browser, 'version_string', '')),
+        'os_family': _safe(getattr(ua.os, 'family', '')),
+        'os_version': _safe(getattr(ua.os, 'version_string', '')),
+        'device_family': _safe(getattr(ua.device, 'family', '')),
+        'device_brand': _safe(getattr(ua.device, 'brand', '')),
+        'device_model': _safe(getattr(ua.device, 'model', '')),
     }
 
 def log_activity(request, action, user=None, album=None, media_file=None):

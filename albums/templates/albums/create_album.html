@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card mx-auto" style="max-width:720px;">
+  <div class="card-body">
+    <h1 class="h4 mb-3">Создать альбом</h1>
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="mb-3">
+        {{ form.title.label_tag }}
+        {{ form.title }}
+        {% if form.title.errors %}<div class="text-danger small">{{ form.title.errors }}</div>{% endif %}
+      </div>
+
+      <div class="mb-3">
+        {{ form.description.label_tag }}
+        {{ form.description }}
+        {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors }}</div>{% endif %}
+      </div>
+
+      <div class="mb-3">
+        {{ form.password.label_tag }}
+        {{ form.password }}
+        {% if form.password.errors %}<div class="text-danger small">{{ form.password.errors }}</div>{% endif %}
+      </div>
+
+      <div class="mb-3 form-check">
+        {{ form.is_public }}
+        {{ form.is_public.label_tag }}
+        {% if form.is_public.errors %}<div class="text-danger small">{{ form.is_public.errors }}</div>{% endif %}
+      </div>
+
+      <div class="mb-3">
+        {{ form.view_password.label_tag }}
+        {{ form.view_password }}
+        {% if form.view_password.errors %}<div class="text-danger small">{{ form.view_password.errors }}</div>{% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-primary">Создать</button>
+      <a href="{% url 'album_list' %}" class="btn btn-link">Отмена</a>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-3 d-flex justify-content-between align-items-start">
+  <div>
+    <h1 class="h4">{{ album.title }}</h1>
+    <p class="text-muted">{{ album.description }}</p>
+  </div>
+  <div>
+    {% if user.is_authenticated and album.owner == user %}
+      <a href="{% url 'upload_media' album.id %}" class="btn btn-sm btn-outline-secondary">Загрузить медиа</a>
+    {% endif %}
+  </div>
+</div>
+
+{% if media_files %}
+  <div class="row g-3">
+    {% for media in media_files %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100">
+          {% if media.file_type == 'image' %}
+            <img src="{{ media.file.url }}" class="card-img-top" alt="{{ media.description|default:media.file.name }}">
+          {% else %}
+            <div class="ratio ratio-16x9 bg-dark">
+              <video controls src="{{ media.file.url }}" style="width:100%"></video>
+            </div>
+          {% endif %}
+          <div class="card-body">
+            <p class="card-text">{{ media.description }}</p>
+            <small class="text-muted">Загружено: {{ media.uploaded_at }}</small>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="card">
+    <div class="card-body">В альбоме пока нет медиа-файлов.</div>
+  </div>
+{% endif %}
+
+{% endblock %}

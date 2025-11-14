@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card mx-auto" style="max-width:600px;">
+  <div class="card-body">
+    <h1 class="h5 mb-3">Доступ к альбому: {{ album.title }}</h1>
+    <p class="text-muted">Альбом защищён паролем. Введите пароль для доступа.</p>
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="mb-3">
+        {{ form.password.label_tag }}
+        {{ form.password }}
+        {% if form.password.errors %}<div class="text-danger small">{{ form.password.errors }}</div>{% endif %}
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Отправить</button>
+        <a href="{% url 'album_list' %}" class="btn btn-link">Назад</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
