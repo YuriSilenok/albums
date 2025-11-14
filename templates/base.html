@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Фотоальбомы</title>
+</head>
+<body>
+    <nav>
+        {% if user.is_authenticated %}
+            Привет, {{ user.username }}! 
+            <a href="{% url 'album_list' %}">Мои альбомы</a>
+            <a href="{% url 'logout' %}">Выйти</a>
+        {% else %}
+            <a href="{% url 'login' %}">Войти</a>
+            <a href="{% url 'register' %}">Регистрация</a>
+        {% endif %}
+    </nav>
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>
